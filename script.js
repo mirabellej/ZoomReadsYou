@@ -2,19 +2,14 @@ const video = document.getElementById("video");
 const expression_threshold = 0.9; // threshold value over which we deduce emotion to be current emotion
 const expression_interval = 1000; // take reading of expression ever n milliseconds
 
-// timers for speech
 var pause_length = 4000; // max pause between phrases
-var next_utterance = Date.now() + pause_length;
+var speaking = false;
 
-setTimeout(pause, pause_length);
-
-// timers for experiment
-var experiment_length = 10000; // 600000 ms = 10 minutes
-var expected = Date.now() + experiment_length;
-var experiment_over = false;
+var experiment_length = 600000; // 600000 ms = 10 minutes
 
 checkTTS();
 
+// make sure all models are loaded prior to starting video
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri("/models/"),
   faceapi.nets.faceLandmark68Net.loadFromUri("/models/"),
@@ -22,12 +17,14 @@ Promise.all([
   faceapi.nets.faceExpressionNet.loadFromUri("/models/"),
 ]).then(startVideo());
 
+// if we're playing, process the video feed
 video.addEventListener("play", () => {
-  processVideo();
+  if (speaking !== true) {
+    processVideo();
+  }
 });
 
-setTimeout(step, experiment_length);
-setTimeout(pause, pause_length);
+setTimeout(endExperiment, experiment_length); // end the experiment when it's time to
 
 /* Computer Vision and Video Functions*/
 
@@ -41,12 +38,19 @@ function processVideo() {
       .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
       .withFaceExpressions();
+
+    if (!detections.length) {
+      console.log("lost a face");
+      return;
+    }
+
     const resizedDetections = faceapi.resizeResults(detections, displaySize);
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     faceapi.draw.drawDetections(canvas, resizedDetections);
     faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
     faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
     var all_expressions = detections[0].expressions;
+    console.log(all_expressions);
     for (const [key, value] of Object.entries(all_expressions)) {
       //console.log(`${key}: ${value}`);
       if (value > expression_threshold) {
@@ -54,7 +58,6 @@ function processVideo() {
         current_expression = key;
         //console.log(key);
         if (current_expression === "happy") {
-          //playSound();
           playGreeting();
         }
       }
@@ -94,14 +97,21 @@ function checkTTS() {
 }
 
 function playGreeting() {
+  speaking = true;
   var msg = new SpeechSynthesisUtterance();
   var voices = window.speechSynthesis.getVoices();
   msg.voice = voices[0];
   //msg.volume = 1; // From 0 to 1
-  //msg.rate = 1; // From 0.1 to 10
+  msg.rate = 0.8; // From 0.1 to 10
   //msg.pitch = 2; // From 0 to 2
   msg.text = "I am reading a story.";
   speechSynthesis.speak(msg);
+  msg.onend = function () {
+    console.log("finished sentence.");
+    pause();
+    console.log("finished pause");
+    speaking = false;
+  };
 }
 
 // to do break this down into switch statement to play specific sound sample from bank for each expression
@@ -110,28 +120,15 @@ function playSound() {
   audio.play();
 }
 
-/* Timing functions */
-
-function step() {
-  var dt = Date.now() - expected; // the drift (positive for overshooting)
-  if (dt > experiment_length) {
-    timer_elapsed = true; // end experiment if overdue - this should never happen
-  }
-  timer_elapsed = true;
-  alert("time's up!");
-  // TO DO: end experiment - go to survey
-  expected += experiment_length;
-  setTimeout(step, Math.max(0, experiment_length - dt)); // take into account drift
+function pause() {
+  speaking = true;
+  setTimeout(goToStandby, pause_length);
 }
 
-function pause() {
-  var dt = Date.now() - next_utterance; // the drift (positive for overshooting)
-  if (dt > pause_length) {
-    // something really bad happened. Maybe the browser (tab) was inactive?
-    // possibly special handling to avoid futile "catch up" run
-  }
-  alert("pause!");
+function goToStandby() {
+  speaking = false;
+}
 
-  next_utterance += pause_length;
-  setTimeout(pause, Math.max(0, pause_length - dt)); // take into account drift
+function endExperiment() {
+  alert("Experiment Over!");
 }
