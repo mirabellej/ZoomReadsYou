@@ -2,10 +2,18 @@ const video = document.getElementById("video");
 const expression_threshold = 0.9; // threshold value over which we deduce emotion to be current emotion
 const expression_interval = 1000; // take reading of expression ever n milliseconds
 
-var pause_length = 4000; // max pause between phrases
+var pause_length = 2000; // max pause between phrases
 var speaking = false;
 
 var experiment_length = 600000; // 600000 ms = 10 minutes
+
+var happy_bank = ["I'm happy", "Boy am I happy"];
+var sad_bank = ["I'm sad", "Boy am I sad"];
+var neutral_bank = ["I'm neutral", "Boy am I neutral"];
+var disgusted_bank = ["I'm disgusted", "Boy am I disgusted"];
+var surprised_bank = ["I'm surprised", "Boy am I surprised"];
+var angry_bank = ["I'm angry", "Boy am I angry"];
+var fearful_bank = ["I'm fearful", "Boy am I fearful"];
 
 checkTTS();
 
@@ -19,9 +27,7 @@ Promise.all([
 
 // if we're playing, process the video feed
 video.addEventListener("play", () => {
-  if (speaking !== true) {
-    processVideo();
-  }
+  processVideo();
 });
 
 setTimeout(endExperiment, experiment_length); // end the experiment when it's time to
@@ -39,27 +45,28 @@ function processVideo() {
       .withFaceLandmarks()
       .withFaceExpressions();
 
-    if (!detections.length) {
-      console.log("lost a face");
+    if (!detections.length || speaking === true) {
+      console.log("waiting");
       return;
     }
 
-    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-    faceapi.draw.drawDetections(canvas, resizedDetections);
-    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-    faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
-    var all_expressions = detections[0].expressions;
-    console.log(all_expressions);
+    /* Uncomment to Draw Face Detections*/
+
+    // const resizedDetections = faceapi.resizeResults(detections, displaySize);
+    // canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    // faceapi.draw.drawDetections(canvas, resizedDetections);
+    // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+    // faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
+
+    /* Process Expressions and Read Lines*/
+    var all_expressions = detections[0].expressions; // only respond to the first face we track
+    //console.log(all_expressions);
     for (const [key, value] of Object.entries(all_expressions)) {
       //console.log(`${key}: ${value}`);
       if (value > expression_threshold) {
-        //console.log(`${key}: ${value}`);
         current_expression = key;
-        //console.log(key);
-        if (current_expression === "happy") {
-          playGreeting();
-        }
+        readLine(current_expression);
+        //console.log(current_expression);
       }
     }
   }, expression_interval);
@@ -96,21 +103,23 @@ function checkTTS() {
   }
 }
 
-function playGreeting() {
+function readLine(current_expression) {
   speaking = true;
+  //console.log(speaking);
   var msg = new SpeechSynthesisUtterance();
   var voices = window.speechSynthesis.getVoices();
   msg.voice = voices[0];
   //msg.volume = 1; // From 0 to 1
   msg.rate = 0.8; // From 0.1 to 10
   //msg.pitch = 2; // From 0 to 2
-  msg.text = "I am reading a story.";
+  //msg.text = "I am reading a story.";
+  bank = eval(current_expression + "_bank");
+  msg.text = bank[0];
   speechSynthesis.speak(msg);
+
+  // when the sentence is over add a pause, then go to standby
   msg.onend = function () {
-    console.log("finished sentence.");
-    pause();
-    console.log("finished pause");
-    speaking = false;
+    setTimeout(goToStandby, pause_length);
   };
 }
 
@@ -120,11 +129,7 @@ function playSound() {
   audio.play();
 }
 
-function pause() {
-  speaking = true;
-  setTimeout(goToStandby, pause_length);
-}
-
+// prepare to say more things
 function goToStandby() {
   speaking = false;
 }
