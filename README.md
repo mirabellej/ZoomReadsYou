@@ -1,5 +1,5 @@
 # ZoomReadsYou
-Browser-based Javascript application created for Nordic Summer Universities Cybiosis Symposium. </br></br>
+Browser-based Javascript application created for Nordic Summer University's Cybiosis Symposium. </br></br>
 An audible narrative is generated based on expression tracking over a web stream to answer the question: what would a story based on your Zoom presence sound like? </br></br>
 The audible text is written by a combination of living and dead authors and GPT2.</br></br>
 Uses FaceAPI.js to recognize 7 expressions including: happy, sad, neutral, disgusted, fearful, surprised angry.</br></br>
