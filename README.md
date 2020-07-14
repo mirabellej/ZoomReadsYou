@@ -1,7 +1,7 @@
 # ZoomReadsYou
 Browser-based Javascript application created for Nordic Summer University's Cybiosis Symposium. </br>http://nordic.university/study-circles/2-cybiosis-shaping-human-technology-futures/</br></br>
 What would a story based on your Zoom presence sound like?</br></br>
-To answer this question, I (a creative writer and programmer) have created the following program. </br></br>
+To answer this question, I have created the following program. </br></br>
 The program produces an audible narrative that is generated based on expression tracking over a web stream. </br></br>
 The audible text (selected at runtime) was composed from the texts of living and dead authors (including yours truly) as well as an artificial intelligence - GPT2.</br></br>
 This program uses FaceAPI.js to recognize 7 expressions including: happy, sad, neutral, disgusted, fearful, surprised angry and output corresponding text using HTML5 text to speech.</br></br>
