@@ -1,5 +1,5 @@
 # ZoomReadsYou
-Browser-based Javascript application created for Nordic Summer University's Cybiosis Symposium. </br></br>
+Browser-based Javascript application created for Nordic Summer University's Cybiosis Symposium. </br>http://nordic.university/study-circles/2-cybiosis-shaping-human-technology-futures/</br></br>
 What would a story based on your Zoom presence sound like?</br></br>
 To answer this question, I (a creative writer and programmer) have created the following program. </br></br>
 The program produces an audible narrative that is generated based on expression tracking over a web stream. </br></br>
@@ -12,5 +12,5 @@ Special thanks to the creators of:</br>
 OpenAI - https://github.com/openai/gpt-2</br>
 FaceAPI.js - https://github.com/justadudewhohacks/face-api.js/</br>
 HTML5 Text to Speech - https://developers.google.com/web/updates/2014/01/Web-apps-that-talk-Introduction-to-the-Speech-Synthesis-API
-</br>
+</br></br>
 And to Nordic Summer University's Cybiosis Circle: http://nordic.university/study-circles/2-cybiosis-shaping-human-technology-futures/
