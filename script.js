@@ -1,6 +1,9 @@
 const video = document.getElementById("video");
 const expression_threshold = 0.9; // threshold value over which we deduce emotion to be current emotion
-const expression_interval = 1000; // take reading of expression ever n milliseconds
+const expression_interval = 200; // take reading of expression ever n milliseconds
+
+let debug = false; // if set to true, prints alerts and logs
+let draw = false; // if set to true, will draw landmarks
 
 var pause_length = 2000; // max pause between phrases
 var speaking = false;
@@ -15,7 +18,15 @@ var surprised_bank = ["I'm surprised", "Boy am I surprised"];
 var angry_bank = ["I'm angry", "Boy am I angry"];
 var fearful_bank = ["I'm fearful", "Boy am I fearful"];
 
-checkTTS();
+if (!debug) {
+  if (!window.console) window.console = {};
+  var methods = ["log", "debug", "warn", "info"];
+  for (var i = 0; i < methods.length; i++) {
+    console[methods[i]] = function () {};
+  }
+}
+
+checkTTS(); // check to make sure the browser supports TTS
 
 // make sure all models are loaded prior to starting video
 Promise.all([
@@ -45,33 +56,39 @@ function processVideo() {
       .withFaceLandmarks()
       .withFaceExpressions();
 
+    // do nothing if we can't detect a face or if we're speaking
     if (!detections.length || speaking === true) {
       console.log("waiting");
       return;
     }
 
-    /* Uncomment to Draw Face Detections*/
+    /* Draw Face Detections in Debug Mode */
+    if (draw === true) {
+      const resizedDetections = faceapi.resizeResults(detections, displaySize);
+      canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+      faceapi.draw.drawDetections(canvas, resizedDetections);
+      faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
+    }
 
-    // const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    // canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-    // faceapi.draw.drawDetections(canvas, resizedDetections);
-    // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-    // faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
-
-    /* Process Expressions and Read Lines*/
+    /* Process Expressions and Read Lines */
     var all_expressions = detections[0].expressions; // only respond to the first face we track
-    //console.log(all_expressions);
+
+    console.log(all_expressions);
+
     for (const [key, value] of Object.entries(all_expressions)) {
-      //console.log(`${key}: ${value}`);
+      //console.log(`${key}: ${value}`); // uncomment to see key value pairs for expressions
       if (value > expression_threshold) {
         current_expression = key;
         readLine(current_expression);
-        //console.log(current_expression);
+        console.log(current_expression);
       }
     }
   }, expression_interval);
 }
 
+// getUserMedia() requires secure server setup https:// or local host
+// if video feed not loading: in VS Code, right click on index.html and run w/ live server
 function startVideo() {
   navigator.getUserMedia =
     navigator.getUserMedia ||
@@ -80,7 +97,7 @@ function startVideo() {
 
   if (navigator.getUserMedia) {
     navigator.getUserMedia(
-      { audio: true, video: { width: 1280, height: 720 } },
+      { audio: false, video: { width: 1280, height: 720 } },
       function (stream) {
         var video = document.querySelector("video");
         video.srcObject = stream;
@@ -93,16 +110,12 @@ function startVideo() {
       }
     );
   } else {
+    alert(
+      "This browser is not supported. Please use the newest version of Chrome or Firefox."
+    );
     console.log("getUserMedia not supported");
   }
 }
-/*
-  navigator.getUserMedia(
-    { video: {} },
-    (stream) => (video.srcObject = stream),
-    (err) => console.error(err)
-  );
-}*/
 
 function determineExpression() {
   var all_expressions = detections[0].expressions;
@@ -116,11 +129,11 @@ function determineExpression() {
 
 /* Text To Speech Functions */
 
+// Check to see if the browser supports TTS
 function checkTTS() {
   if ("speechSynthesis" in window) {
-    // Speech Synthesis supported
+    console.log("TTS supported");
   } else {
-    // Speech Synthesis Not Supported
     alert(
       "Sorry, your browser doesn't support text to speech. Please exit the experiment."
     );
@@ -159,5 +172,9 @@ function goToStandby() {
 }
 
 function endExperiment() {
-  alert("Experiment Over!");
+  if (debug === true) {
+    alert("Experiment Over!");
+  } else {
+    window.location.href = "survey.html";
+  }
 }
