@@ -2,14 +2,16 @@ const video = document.getElementById("video");
 const expression_threshold = 0.9; // threshold value over which we deduce emotion to be current emotion
 const expression_interval = 200; // take reading of expression ever n milliseconds
 
-let debug = false; // if set to true, prints alerts and logs
-let draw = false; // if set to true, will draw landmarks
+// Debug & Output Settings
+let debug = true; // if set to true, prints alerts and logs
+let draw = false; // if set to true, will draw landmarks - will not draw during pauses!
 
-var pause_length = 2000; // max pause between phrases
+var pause_length = 2000; // max pause between phrases - set to 0 if you want constant processing
 var speaking = false;
 
 var experiment_length = 600000; // 600000 ms = 10 minutes
 
+// recognized expressions: neutral, happy, sad, disgusted, surprised, angry, fearful
 var happy_bank = ["I'm happy", "Boy am I happy"];
 var sad_bank = ["I'm sad", "Boy am I sad"];
 var neutral_bank = ["I'm neutral", "Boy am I neutral"];
@@ -27,6 +29,7 @@ if (!debug) {
 }
 
 checkTTS(); // check to make sure the browser supports TTS
+textToFile();
 
 // make sure all models are loaded prior to starting video
 Promise.all([
@@ -74,7 +77,7 @@ function processVideo() {
     /* Process Expressions and Read Lines */
     var all_expressions = detections[0].expressions; // only respond to the first face we track
 
-    console.log(all_expressions);
+    //console.log(all_expressions);
 
     for (const [key, value] of Object.entries(all_expressions)) {
       //console.log(`${key}: ${value}`); // uncomment to see key value pairs for expressions
@@ -142,28 +145,21 @@ function checkTTS() {
 
 function readLine(current_expression) {
   speaking = true;
-  //console.log(speaking);
   var msg = new SpeechSynthesisUtterance();
   var voices = window.speechSynthesis.getVoices();
   msg.voice = voices[0];
   //msg.volume = 1; // From 0 to 1
-  msg.rate = 0.8; // From 0.1 to 10
   //msg.pitch = 2; // From 0 to 2
-  //msg.text = "I am reading a story.";
+  msg.rate = 0.8; // From 0.1 to 10
   bank = eval(current_expression + "_bank");
-  msg.text = bank[0];
+  let rand = Math.floor(Math.random() * bank.length);
+  console.log(bank[rand]);
+  msg.text = bank[rand];
   speechSynthesis.speak(msg);
-
   // when the sentence is over add a pause, then go to standby
   msg.onend = function () {
     setTimeout(goToStandby, pause_length);
   };
-}
-
-// to do break this down into switch statement to play specific sound sample from bank for each expression
-function playSound() {
-  var audio = new Audio("/beep.mp3");
-  audio.play();
 }
 
 // prepare to say more things
@@ -171,6 +167,17 @@ function goToStandby() {
   speaking = false;
 }
 
+function textToFile() {
+  var data1 = new FormData();
+  data1.append("data", "the_text_you_want_to_save");
+  var xhr = window.XMLHttpRequest
+    ? new XMLHttpRequest()
+    : new activeXObject("Microsoft.XMLHTTP");
+  xhr.open("put", "saved.txt", true);
+  xhr.send(data1);
+}
+
+// End Experiment
 function endExperiment() {
   if (debug === true) {
     alert("Experiment Over!");
