@@ -20,6 +20,8 @@ var surprised_bank = ["I'm surprised", "Boy am I surprised"];
 var angry_bank = ["I'm angry", "Boy am I angry"];
 var fearful_bank = ["I'm fearful", "Boy am I fearful"];
 
+var text_spoken = [];
+
 if (!debug) {
   if (!window.console) window.console = {};
   var methods = ["log", "debug", "warn", "info"];
@@ -29,7 +31,6 @@ if (!debug) {
 }
 
 checkTTS(); // check to make sure the browser supports TTS
-textToFile();
 
 // make sure all models are loaded prior to starting video
 Promise.all([
@@ -154,12 +155,20 @@ function readLine(current_expression) {
   bank = eval(current_expression + "_bank");
   let rand = Math.floor(Math.random() * bank.length);
   console.log(bank[rand]);
-  msg.text = bank[rand];
-  speechSynthesis.speak(msg);
-  // when the sentence is over add a pause, then go to standby
-  msg.onend = function () {
-    setTimeout(goToStandby, pause_length);
-  };
+  let selected_text = bank[rand];
+  if (text_spoken.includes(selected_text)) {
+    console.log("redundant"); // don't speak or include redundant text
+    goToStandby();
+  } else {
+    msg.text = selected_text;
+    speechSynthesis.speak(msg); // speak the message out loud
+    text_spoken.push(msg.text); // record the message as spoken
+    console.log(text_spoken);
+    // when the sentence is over add a pause, then go to standby
+    msg.onend = function () {
+      setTimeout(goToStandby, pause_length);
+    };
+  }
 }
 
 // prepare to say more things
@@ -173,7 +182,7 @@ function textToFile() {
   var xhr = window.XMLHttpRequest
     ? new XMLHttpRequest()
     : new activeXObject("Microsoft.XMLHTTP");
-  xhr.open("put", "saved.txt", true);
+  xhr.open("post", "saved.txt", true);
   xhr.send(data1);
 }
 
@@ -182,6 +191,14 @@ function endExperiment() {
   if (debug === true) {
     alert("Experiment Over!");
   } else {
+    // stop recording and upload file to server
     window.location.href = "survey.html";
   }
 }
+
+$.ajax({
+  url: "test.php",
+  success: function (data) {
+    $(".result").html(data);
+  },
+});
