@@ -6,8 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Document</title>
     <link rel="shortcut icon" type="image/jpg" href="/favicon.jpg" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script defer src="face-api.min.js"></script>
     <script defer src="script.js"></script>
+
     <style>
       body {
         margin: 0;
@@ -20,11 +22,56 @@
       }
 
       canvas {
+        margin: 0;
         position: absolute;
+      }
+
+      #data {
+        display: none;
+      }
+
+      #stateButton {
+        display: none;
+      }
+
+      #stop {
+        display: none;
+      }
+
+      #pauseRes {
+        display: none;
       }
     </style>
   </head>
   <body>
     <video id="video" width="720" height="560" autoplay muted></video>
+    <div id="controls">
+      <button id="rec" onclick="onBtnRecordClicked()">Record</button>
+      <button id="pauseRes" onclick="onPauseResumeClicked()" disabled>
+        Pause
+      </button>
+      <button id="stop" onclick="onBtnStopClicked()" disabled>Stop</button>
+      <button id="stateButton" onclick="onStateClicked()">
+        trace state
+      </button>
+      <a
+        id="downloadLink"
+        download="mediarecorder.webm"
+        name="mediarecorder.webm"
+        href
+      ></a>
+    </div>
+
+    <p id="data"></p>
+    <script src="https://webrtchacks.github.io/adapter/adapter-latest.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#rec").click(function () {
+          setInterval(function () {
+            $("#stop").click();
+          }, 9000);
+        });
+      });
+    </script>
   </body>
 </html>
