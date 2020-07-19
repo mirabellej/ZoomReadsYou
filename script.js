@@ -195,10 +195,3 @@ function endExperiment() {
     window.location.href = "survey.html";
   }
 }
-
-$.ajax({
-  url: "test.php",
-  success: function (data) {
-    $(".result").html(data);
-  },
-});
