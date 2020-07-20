@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
+    <title>Zoom Reads You</title>
     <link rel="shortcut icon" type="image/jpg" href="/favicon.jpg" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script defer src="face-api.min.js"></script>
     <script defer src="script.js"></script>
@@ -44,22 +45,24 @@
     </style>
   </head>
   <body>
-    <video id="video" width="720" height="560" autoplay muted></video>
-    <div id="controls">
-      <button id="rec" onclick="onBtnRecordClicked()">Record</button>
-      <button id="pauseRes" onclick="onPauseResumeClicked()" disabled>
-        Pause
-      </button>
-      <button id="stop" onclick="onBtnStopClicked()" disabled>Stop</button>
-      <button id="stateButton" onclick="onStateClicked()">
-        trace state
-      </button>
-      <a
-        id="downloadLink"
-        download="mediarecorder.webm"
-        name="mediarecorder.webm"
-        href
-      ></a>
+    <div id="maincontainter">
+      <video id="video" width="720" height="560" autoplay muted></video>
+      <div id="controls">
+        <button id="rec" onclick="onBtnRecordClicked()">START</button>
+        <button id="pauseRes" onclick="onPauseResumeClicked()" disabled>
+          Pause
+        </button>
+        <button id="stop" onclick="onBtnStopClicked()" disabled>Stop</button>
+        <button id="stateButton" onclick="onStateClicked()">
+          trace state
+        </button>
+        <a
+          id="downloadLink"
+          download="mediarecorder.webm"
+          name="mediarecorder.webm"
+          href
+        ></a>
+      </div>
     </div>
 
     <p id="data"></p>
@@ -70,7 +73,7 @@
         $("#rec").click(function () {
           setInterval(function () {
             $("#stop").click();
-          }, 150000); // change to 570000
+          }, 30000); // change to 570000
         });
       });
     </script>

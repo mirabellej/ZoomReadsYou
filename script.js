@@ -12,14 +12,17 @@ var constraints = {
 };
 
 // Debug, Recording & Output Settings
-let debug = true; // if set to true, prints alerts and logs
+let debug = true; // if set to true, prints alerts / logs
 let draw = false; // if set to true, will draw landmarks - will not draw during pauses!
 let recording = true; // if set to true, recordings will be uploaded
 
-var pause_length = 2000; // max pause between phrases - set to 0 if you want constant processing
+// vary the length of pauses between sentences
+var max_pause_length = 3000;
+var pause_length = Math.floor(Math.random() * max_pause_length); // max pause between phrases - set to 0 if you want constant processing
+
 var speaking = false;
 
-var experiment_length = 400000; // 600000 ms = 10 minutes - after this time go to survey
+var experiment_length = 80000; // 600000 ms = 10 minutes - after this time go to survey
 
 // recognized expressions: neutral, happy, sad, disgusted, surprised, angry, fearful
 
@@ -804,7 +807,7 @@ function processVideo() {
       return;
     }
 
-    /* Draw Face Detections in Debug Mode */
+    /* Draw Face Detections if in Draw Mode */
     if (draw === true) {
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
       canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
@@ -900,6 +903,7 @@ function textToFile() {
 function endExperiment() {
   if (debug === true) {
     alert("Experiment Over!");
+    window.location.href = "survey.html";
   } else {
     window.location.href = "survey.html";
   }
