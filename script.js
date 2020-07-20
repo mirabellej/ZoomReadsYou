@@ -5,8 +5,8 @@ const expression_interval = 200; // take reading of expression ever n millisecon
 var constraints = {
   audio: true,
   video: {
-    width: { min: 720, ideal: 720, max: 720 },
-    height: { min: 560, ideal: 560, max: 560 },
+    width: { min: 200, ideal: 720, max: 720 },
+    height: { min: 200, ideal: 560, max: 560 },
     framerate: 60,
   },
 };
@@ -19,7 +19,7 @@ let recording = true; // if set to true, recordings will be uploaded
 var pause_length = 2000; // max pause between phrases - set to 0 if you want constant processing
 var speaking = false;
 
-var experiment_length = 600000; // 600000 ms = 10 minutes
+var experiment_length = 600000; // 600000 ms = 10 minutes - after this time go to survey
 
 // recognized expressions: neutral, happy, sad, disgusted, surprised, angry, fearful
 var happy_bank = ["I'm happy", "Boy am I happy"];
@@ -99,6 +99,7 @@ function processVideo() {
     //console.log(all_expressions);
 
     for (const [key, value] of Object.entries(all_expressions)) {
+      //alert("cat");
       //console.log(`${key}: ${value}`); // uncomment to see key value pairs for expressions
       if (value > expression_threshold) {
         current_expression = key;
@@ -152,6 +153,7 @@ function readLine(current_expression) {
     speechSynthesis.speak(msg); // speak the message out loud
     text_spoken.push(msg.text); // record the message as spoken
     console.log(text_spoken);
+
     // when the sentence is over add a pause, then go to standby
     msg.onend = function () {
       setTimeout(goToStandby, pause_length);
@@ -179,7 +181,6 @@ function endExperiment() {
   if (debug === true) {
     alert("Experiment Over!");
   } else {
-    // stop recording and upload file to server
     window.location.href = "survey.html";
   }
 }
@@ -346,7 +347,7 @@ function onBtnRecordClicked() {
         var formData = new FormData();
         formData.append(fileType + "-filename", fileName);
         formData.append(fileType + "-blob", blob);
-
+        formData.append("spokentext", text_spoken);
         //xhr('save.php', formData, function (fName) {
         //window.open(location.href + fName);
         //});
@@ -361,7 +362,7 @@ function onBtnRecordClicked() {
           type: "POST",
           success: function (response) {
             if (response === "success") {
-              alert("Video Successfully Uploaded To Server!");
+              alert("Video & File Successfully Uploaded To The Server!");
             } else {
               alert(response);
             }
