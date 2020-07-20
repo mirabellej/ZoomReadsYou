@@ -64,12 +64,13 @@
 
     <p id="data"></p>
     <script src="https://webrtchacks.github.io/adapter/adapter-latest.js"></script>
+
     <script>
       $(document).ready(function () {
         $("#rec").click(function () {
           setInterval(function () {
             $("#stop").click();
-          }, 9000);
+          }, 570000); // upload after nine minutes thirty seconds - allows 30 seconds for upload
         });
       });
     </script>
