@@ -12,6 +12,7 @@ This is an open source project built on open sourced projects. </br></br>
 Special thanks to the creators of:</br>
 OpenAI - https://github.com/openai/gpt-2</br>
 FaceAPI.js - https://github.com/justadudewhohacks/face-api.js/</br>
-Google Speech Synthesis API - https://developers.google.com/web/updates/2014/01/Web-apps-that-talk-Introduction-to-the-Speech-Synthesis-API
+Google Speech Synthesis API - https://developers.google.com/web/updates/2014/01/Web-apps-that-talk-Introduction-to-the-Speech-Synthesis-API</br>
+Google MediaRecorder API - https://developers.google.com/web/updates/2016/01/mediarecorder</br>
 </br></br>
 And to Nordic Summer University's Cybiosis Circle: http://nordic.university/study-circles/2-cybiosis-shaping-human-technology-futures/
