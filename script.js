@@ -1,6 +1,6 @@
 const video = document.getElementById("video");
 const expression_threshold = 0.9; // threshold value over which we deduce emotion to be current emotion
-const expression_interval = 200; // take reading of expression ever n milliseconds
+const expression_interval = 200; // take reading of expression every n milliseconds
 
 var constraints = {
   audio: true,
@@ -12,17 +12,17 @@ var constraints = {
 };
 
 // Debug, Recording & Output Settings
-let debug = true; // if set to true, prints alerts / logs
+let debug = false; // if set to true, prints alerts / logs
 let draw = false; // if set to true, will draw landmarks - will not draw during pauses!
 let recording = true; // if set to true, recordings will be uploaded
 
 // vary the length of pauses between sentences
-var max_pause_length = 3000;
+var max_pause_length = 4500;
 var pause_length = Math.floor(Math.random() * max_pause_length); // max pause between phrases - set to 0 if you want constant processing
 
 var speaking = false;
 
-var experiment_length = 80000; // 600000 ms = 10 minutes - after this time go to survey
+//var experiment_length = 400000; // 600000 ms = 10 minutes - after this time go to survey
 
 // recognized expressions: neutral, happy, sad, disgusted, surprised, angry, fearful
 
@@ -786,8 +786,6 @@ Promise.all([
   faceapi.nets.faceExpressionNet.loadFromUri("/models/"),
 ]).then(startVideo());
 
-setTimeout(endExperiment, experiment_length); // end the experiment when it's time to
-
 /* Computer Vision and Video Functions*/
 
 function processVideo() {
@@ -822,7 +820,6 @@ function processVideo() {
     //console.log(all_expressions);
 
     for (const [key, value] of Object.entries(all_expressions)) {
-      //alert("cat");
       //console.log(`${key}: ${value}`); // uncomment to see key value pairs for expressions
       if (value > expression_threshold) {
         current_expression = key;
@@ -860,6 +857,7 @@ function readLine(current_expression) {
   speaking = true;
   var msg = new SpeechSynthesisUtterance();
   var voices = window.speechSynthesis.getVoices();
+  var localstorage = "";
   msg.voice = voices[0];
   //msg.volume = 1; // From 0 to 1
   //msg.pitch = 2; // From 0 to 2
@@ -874,12 +872,16 @@ function readLine(current_expression) {
   } else {
     msg.text = selected_text;
     speechSynthesis.speak(msg); // speak the message out loud
+    //alert(msg.text);
     text_spoken.push(msg.text); // record the message as spoken
+
+    localstorage += msg.text;
+    localStorage.setItem("speaking_text", localstorage);
     console.log(text_spoken);
 
     // when the sentence is over add a pause, then go to standby
     msg.onend = function () {
-      setTimeout(goToStandby, pause_length);
+      setTimeout(goToStandby, Math.floor(Math.random() * max_pause_length));
     };
   }
 }
@@ -906,6 +908,16 @@ function endExperiment() {
     window.location.href = "survey.html";
   } else {
     window.location.href = "survey.html";
+  }
+}
+
+// Experiment Failed - files could not upload to server
+function failExperiment() {
+  if (debug === true) {
+    alert("Experiment Failed!");
+    window.location.href = "fail.html";
+  } else {
+    window.location.href = "fail.html";
   }
 }
 
@@ -1053,6 +1065,8 @@ function onBtnRecordClicked() {
           "mediaRecorder.onstop, mediaRecorder.state = " + mediaRecorder.state
         );
 
+        //stopBtn.disabled = true;
+        recBtn.disabled = true;
         var blob = new Blob(chunks, { type: "video/webm" });
         chunks = [];
 
@@ -1060,7 +1074,8 @@ function onBtnRecordClicked() {
 
         downloadLink.href = videoURL;
         video.src = videoURL;
-        downloadLink.innerHTML = "Download video file";
+        downloadLink.innerHTML =
+          "PROCESSING. This may take up to five minutes. Please do not close your browser. Click here to download video.";
 
         var rand = Math.floor(Math.random() * 10000000);
         var name = "video_" + rand + ".webm";
@@ -1071,7 +1086,10 @@ function onBtnRecordClicked() {
         var formData = new FormData();
         formData.append(fileType + "-filename", fileName);
         formData.append(fileType + "-blob", blob);
+        //formData.append("spokentext", localStorage.getItem("speaking_text"));
+
         formData.append("spokentext", text_spoken);
+
         //xhr('save.php', formData, function (fName) {
         //window.open(location.href + fName);
         //});
@@ -1086,9 +1104,12 @@ function onBtnRecordClicked() {
           type: "POST",
           success: function (response) {
             if (response === "success") {
-              alert("Video & File Successfully Uploaded To The Server!");
+              localStorage.setItem("speaking_text", "");
+              setTimeout(endExperiment, 1000);
+              //alert("Video & File Successfully Uploaded To The Server!");
             } else {
-              alert(response);
+              //alert(response);
+              setTimeout(failExperiment, 1000);
             }
           },
         });
@@ -1113,7 +1134,7 @@ function onBtnRecordClicked() {
           "mediaRecorder.onpause, mediaRecorder.state = " + mediaRecorder.state
         );
       };
-
+      recBtn.disabled = true;
       mediaRecorder.onresume = function () {
         log(
           "mediaRecorder.onresume, mediaRecorder.state = " + mediaRecorder.state
@@ -1158,20 +1179,20 @@ function onBtnStopClicked() {
   video.controls = true;
   recBtn.disabled = false;
   pauseResBtn.disabled = true;
-  stopBtn.disabled = true;
+  stopBtn.disabled = false;
 }
 
 function onPauseResumeClicked() {
   if (pauseResBtn.textContent === "Pause") {
     pauseResBtn.textContent = "Resume";
     mediaRecorder.pause();
-    stopBtn.disabled = true;
+    stopBtn.disabled = false;
   } else {
     pauseResBtn.textContent = "Pause";
     mediaRecorder.resume();
     stopBtn.disabled = false;
   }
-  recBtn.disabled = true;
+  //recBtn.disabled = true;
   pauseResBtn.disabled = false;
 }
 
