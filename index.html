@@ -56,14 +56,14 @@
         <button id="stateButton" onclick="onStateClicked()">
           trace state
         </button>
-        <a
-          id="downloadLink"
-          download="mediarecorder.webm"
-          name="mediarecorder.webm"
-          href
-        ></a>
       </div>
     </div>
+    <a
+      id="downloadLink"
+      download="mediarecorder.webm"
+      name="mediarecorder.webm"
+      href
+    ></a>
 
     <p id="data"></p>
     <script src="https://webrtchacks.github.io/adapter/adapter-latest.js"></script>
@@ -73,7 +73,7 @@
         $("#rec").click(function () {
           setInterval(function () {
             $("#stop").click();
-          }, 30000); // change to 570000
+          }, 300000); // 300000 milliseconds = 5 minutes // 180000 = 3 minutes
         });
       });
     </script>
