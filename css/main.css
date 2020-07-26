@@ -48,9 +48,13 @@ a:hover {
 }
 
 a#downloadLink {
-  display: block;
-  margin: 0 0 1em 0;
-  min-height: 1.2em;
+  position: fixed;
+  margin-top: 0px;
+  margin-left: 0px;
+  font-size: 24px;
+  font-weight: 800;
+  color: rgba(216, 51, 188, 0.76);
+  background-color: white;
 }
 
 div#container {
